@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { PartnerType, SurveyEntry, CoupleProfile, User } from './types.ts';
+import { PartnerType, SurveyEntry, CoupleProfile, User } from './types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +37,10 @@ const authenticateToken = (req: any, res: any, next: any) => {
 };
 
 // --- API Routes ---
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', env: process.env.NODE_ENV });
+});
 
 // Signup
 app.post('/api/auth/signup', async (req, res) => {
@@ -121,6 +125,17 @@ app.post('/api/entries', authenticateToken, (req: any, res) => {
   };
   entries.push(entry);
   res.json(entry);
+});
+
+// API 404 Handler
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
+// Global Error Handler
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
 });
 
 // --- Vite Integration ---
